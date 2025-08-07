@@ -37,7 +37,7 @@ You will need Python 3 and the Pillow library for image handling.
 
 pip install Pillow
 
-Version 1: IMDb Version (media_sorter_py)
+Version 1: IMDb Version (Plex_Sort_Concept_IMDB.py)
 This version uses the imdbpy library to fetch data from IMDb.
 
 Installation:
@@ -74,7 +74,7 @@ Navigate to the directory where you saved the Python script.
 Run the application using Python 3:
 
 # For the IMDb version
-python3 media_sorter_py
+python3 Plex_Sort_Concept_IMDB.py
 
 # For the TMDb version
 python3 media_sorter_tmdb.py
