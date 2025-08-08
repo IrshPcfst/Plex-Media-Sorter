@@ -1,109 +1,73 @@
-Plex Media Sorter
-Designed by: TheIrishPacifist
+Plex Media Sorter (PyQt5 Edition) - README
 
-1. Project Premise
+User Guide
 
-Plex Media Sorter is a graphical user interface (GUI) application built with Python and Tkinter. Its primary goal is to automate the tedious process of organizing a digital media library for use with Plex Media Server.
+Premise
 
-The application scans a user-specified folder for movie and TV show files, intelligently identifies them using an online database (either IMDb or TMDb), and then renames and moves them into a clean, Plex-compliant folder structure.
+This application was designed and programmed to automate the tedious process of sorting and renaming media files for use with a Plex Media Server. It takes a folder of unsorted movies and TV shows, uses The Movie Database (TMDb) API to identify them, and then renames and moves them into a clean, Plex-compliant folder structure: Movies/[Year]/Movie Name (Year).ext and TV Shows/[Show Name]/Season [##]/S##E## - Episode Name.ext.
 
-Core Features:
+Installation & Setup
 
-Automatic Identification: Uses the file or parent folder name to search an online database for the correct movie or TV series.
+To run this application, you will need Python 3 and a few third-party libraries.
 
-User-Driven Disambiguation: If multiple potential matches are found, it presents a list to the user to make the final choice.
+Install Libraries: Open your terminal or command prompt and run the following command: pip install PyQt5 tmdbv3api.
 
-Plex-Compliant Naming: Renames files to the standard Plex naming convention:
+Set TMDb API Key: The application requires a free API key from The Movie Database. Sign up for an account at https://www.themoviedb.org/. Go to your account settings and generate an API key. Open the Python script (plex_sorter_pyqt5.py) and find this line (around line 30): tmdb.api_key = 'd17e73dca61aea81546e514faa5b3ff9' # Your TMDb API key. Replace the existing key with your own.
 
-Movies: Movie Name (YYYY).ext
+(Optional) Set Custom Logos: The UI displays two logos. To use your own, find these sections in the script and replace the file paths with the correct path to your images. Plex Logo is around line 590: plex_pixmap = QPixmap("/home/jamescreamer/Pictures/plex_logo.png").scaled(...). Your Logo is around line 700: your_pixmap = QPixmap("/home/jamescreamer/Pictures/171210048.png").scaled(...).
 
-TV Shows: SXXEYY - Episode Title.ext
+How to Use
 
-Correct Folder Structure: Automatically creates and sorts files into a hierarchical folder structure:
+Run the Script: Execute the Python file from your terminal: python plex_sorter_pyqt5.py.
 
-Movies: Destination/Movies/YYYY/
+Select Folders: For Unsorted Media Location, click "Browse" and choose the folder containing the media files you want to sort. For Sorted Media Destination, click "Browse" and choose the folder where you want the organized files to be saved.
 
-TV Shows: Destination/TV/YYYY/Show Name/Season XX/
+Select Media Type: Movies and TV Shows sorts both types of media. TV Shows Only skips any files that don't look like a TV show episode (e.g., missing "S01E01"). Movies Only skips any files that do look like a TV show episode.
 
-Flexible Options: Allows users to sort movies, TV shows, or both, and provides an option to copy files instead of moving them.
+Options: If "Keep Original Files?" is checked, the application will copy the files instead of moving them, leaving your original files untouched.
 
-Debugging Tools: Includes a "Force Stop" button and a "Generate Debug Log" option for troubleshooting.
+Start Sorting: Click the "Start Sorting" button to begin the process.
 
-2. Requirements & Setup
-This project has two main versions, each relying on a different online database. Please follow the setup instructions for the version you intend to use.
+Action Log: This window shows the step-by-step progress of the application.
 
-For Both Versions (Required)
-You will need Python 3 and the Pillow library for image handling.
+Selection Pane: If the application finds multiple possible matches for a file, they will appear here. Select the correct one and click "Select", or click "Skip" to ignore that file.
 
-pip install Pillow
+Stopping the Process: "Stop Sorting" politely asks the program to finish its current file and then stop. "Force Stop" immediately kills the sorting process. Use this only if the application becomes unresponsive. A warning message is displayed below this button to remind you of its function.
 
-Version 1: IMDb Version (Plex_Sort_Concept_IMDB.py)
-This version uses the imdbpy library to fetch data from IMDb.
+Debugging
 
-Installation:
+A detailed log file named media_sorter.log is automatically created in the same directory as the script. If you encounter any bugs, this file contains extremely detailed information about the program's execution, including the raw data received from the API, which is invaluable for troubleshooting.
 
-pip install imdbpy
+Development History & Implementation
 
-Version 2: TMDb Version (media_sorter_tmdb) - Recommended
-This version is more reliable and uses The Movie Database (TMDb) API.
+This project was a complete overhaul of an initial concept. I began with a functional but limited application built with Python's tkinter library and systematically upgraded it to a more robust and modern solution using PyQt5.
 
-Installation:
+Initial State
 
-pip install tmdbv3api
+The project started as a single Python script using tkinter for the user interface. It could successfully identify and sort files but lacked robust error handling, a detailed logging system, and had a less refined UI.
 
-TMDb API Key Setup:
-This version requires a free API key from TMDb.
+The Overhaul Process
 
-Create a free account on themoviedb.org.
+My goal was to create a more professional, stable, and user-friendly application.
 
-Log in, go to your account Settings, and click on the API tab in the left sidebar.
+Migration from tkinter to PyQt5: The first major step was rebuilding the entire user interface from scratch using PyQt5. This allowed for more control over the layout and styling, resulting in a UI that closely matched my original design concept. I replaced all tkinter widgets with their PyQt5 equivalents and used layout managers (QHBoxLayout, QVBoxLayout) for a more responsive design.
 
-Request an API key (for personal or developer use).
+Implementing a Professional Logging System: I replaced the simple print statements and custom debug functions with Python's standard logging library. I configured it to create a media_sorter.log file that captures highly detailed DEBUG level information, while simultaneously displaying cleaner, user-friendly INFO level messages in the UI's Action Log.
 
-Once you have your key, open the media_sorter_tmdb.py script and paste your key into this line:
+Threading and UI Responsiveness: To prevent the UI from freezing during long-running sorting operations, I moved the entire sorting logic into a separate QThread. I used PyQt5's native signal and slot mechanism for safe communication between the worker thread and the main UI thread. This was a significant architectural improvement over the initial tkinter implementation.
 
-tmdb.api_key = 'YOUR_API_KEY_HERE'
+The Debugging Journey: Throughout the overhaul, I encountered and solved a series of progressively more complex bugs:
 
-3. Running the Application
-Ensure you have installed the required packages for the version you want to run.
+Initial Data Display Bug: The app was incorrectly displaying <built-in method title of str object...> when presenting search results. I identified that my check, hasattr(item, 'title'), was incorrectly identifying string methods as valid media titles. I fixed this by implementing a more robust check for a unique attribute (id) on the API objects.
 
-Open a terminal or command prompt.
+Threading Crashes (TypeError: UILogger cannot be converted to QObject): The application was crashing with a Segmentation fault. I traced this to my custom UI logger attempting to modify the UI directly from the worker thread. I fixed this by making the logger a QObject that emits a signal, allowing the UI to be updated safely from the main thread. When that fix was incomplete, I discovered that the inheritance order was critical; class UILogger(QObject, logging.Handler) was the correct implementation.
 
-Navigate to the directory where you saved the Python script.
+API Data Type Mismatch (TypeError: argument 1 has unexpected type 'AsObj'): The app crashed because the tmdbv3api library returns a custom object type, not a standard Python list, which my PyQt signal was expecting. I resolved this by explicitly converting the API result to a list before emitting the signal: list(results.results).
 
-Run the application using Python 3:
+Final API Object Usage Bug (AttributeError: 'TV' object has no attribute 'season'): After several attempts, the root cause of the final major bug was identified. The program was still crashing when trying to fetch season details. The error persisted because the tmdbv3api library requires a specific Season() object to fetch season details, not the TV() object. The fix was to import Season from the library and use Season().details(show_id, season_number) to correctly retrieve the season information. This resolved the last critical error and made the TV show sorting logic fully functional.
 
-# For the IMDb version
-python3 Plex_Sort_Concept_IMDB.py
+Improving Search Logic: My initial search logic was too simple. If a search for "sherlock holmes bbc" failed, it would give up. I implemented a far more robust aggregated search system. It now generates multiple search terms (e.g., "sherlock holmes bbc", "sherlock holmes", "sherlock"), executes all of them, and combines the unique results into a single list for the user. This dramatically increases the chances of finding the correct media. - this is still currently happening
 
-# For the TMDb version
-python3 media_sorter_tmdb.py
+Handling Freezes and Lock-ups: The application would freeze if the API was slow to respond, which in turn caused the UI to lock up if I tried to stop the process. I implemented a two-part solution: I added a 30-second global timeout to all API requests to prevent the worker thread from ever getting stuck indefinitely, and I changed the "Force Stop" button to use thread.terminate(), ensuring it can immediately kill a frozen worker thread and restore UI responsiveness.
 
-The graphical user interface will appear. Use the "Browse" buttons to select your source and destination folders, choose your options, and click "Start Sorting".
-
-4. Our Bug Squashing Journey 🐛
-This application was developed through an iterative process of coding and debugging. Here are some of the major roadblocks we encountered and how we fixed them:
-
-The Unreliable Search (IMDb):
-
-Problem: The initial searches for TV shows were returning a list dominated by movies with similar names. The correct TV series was often buried or missing from the top results.
-
-Solution: We implemented a multi-tiered search strategy. The script now searches for the full name, then progressively shorter versions (e.g., "sherlock holmes bbc" -> "sherlock holmes" -> "sherlock"), combines all the results, and intelligently sorts them to prioritize the most likely media type, ensuring the user sees the best possible matches first.
-
-The Missing Episode Data:
-
-Problem: After correctly identifying a TV series, the script would fail to get the episode title, reporting that the 'episodes' data was missing.
-
-Solution: Unsolved
-
-The Faulty Cache:
-
-Problem: The application was caching the TV show information before the episode list had been successfully fetched. This caused every subsequent episode from the same folder to fail because it was retrieving an incomplete object from the cache.
-
-Solution: Unsolved
-
-The Disappearing Buttons (UI Bug):
-
-Problem: In the redesigned UI, the "Select" and "Skip" buttons in the selection panel were not appearing correctly, making it impossible for the user to proceed.
-
-Solution: We refactored the UI layout to make the selection panel and its buttons permanent, static elements. The buttons are now always visible and are simply enabled or disabled as needed, which fixed the layout bug.
+This iterative process of coding, testing, and debugging has resulted in a stable, feature-rich, and reliable application.
